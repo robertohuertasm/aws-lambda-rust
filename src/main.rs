@@ -13,7 +13,7 @@ use std::error::Error;
 #[derive(Deserialize, Clone)]
 struct CustomEvent {
     #[serde(rename = "firstName")]
-    first_name: String,
+    first_name: Option<String>,
 }
 
 #[derive(Serialize, Clone)]
@@ -32,18 +32,26 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 
 fn my_handler(e: CustomEvent, c: lambda::Context) -> Result<CustomOutput, HandlerError> {
-    let x = e.first_name.as_str();
-    match x {
-        "" => Ok(CustomOutput {
+    if let Some(x) = e.first_name {
+        let x = x.as_str();
+        match x {
+            "" => Ok(CustomOutput {
+                is_base64_encoded: false,
+                status_code: 200,
+                body: format!("Hello from Rust, my dear default user with empty parameter!"),
+            }),
+            "error" => Err(c.new_error("Empty first name")),
+            _ => Ok(CustomOutput {
+                is_base64_encoded: false,
+                status_code: 200,
+                body: format!("Hello from Rust, my dear {}!", x),
+            }),
+        }
+    } else {
+        Ok(CustomOutput {
             is_base64_encoded: false,
             status_code: 200,
             body: format!("Hello from Rust, my dear default user!"),
-        }),
-        "error" => Err(c.new_error("Empty first name")),
-        _ => Ok(CustomOutput {
-            is_base64_encoded: false,
-            status_code: 200,
-            body: format!("Hello from Rust, my dear {}!", e.first_name),
-        }),
+        })
     }
 }
