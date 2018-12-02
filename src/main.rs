@@ -55,6 +55,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 
 fn my_handler(e: CustomEvent, c: lambda::Context) -> Result<CustomOutput, HandlerError> {
+    // checking the query string
     if let Some(q) = e.query_string_parameters {
         if let Some(first_name) = q.first_name {
             return match first_name.as_ref() {
@@ -69,45 +70,27 @@ fn my_handler(e: CustomEvent, c: lambda::Context) -> Result<CustomOutput, Handle
             };
         }
     }
+
+    // cheking the body
     if let Some(b) = e.body {
-        //  if let Some(first_name) = b.first_name {
-        return match b.as_ref() {
-            "" => Ok(CustomOutput::new(format!(
-                "Hello from Rust, my dear default user with empty parameter! (body)"
-            ))),
-            "error" => Err(c.new_error("Empty first name (body)")),
-            _ => {
-                let result: Body = serde_json::from_str(&b).unwrap();
-                Ok(CustomOutput::new(format!(
+        let parsed_body: Result<Body, serde_json::Error> = serde_json::from_str(&b);
+        if let Ok(result) = parsed_body {
+            return match result.first_name.as_ref().map(|s| &s[..]) {
+                Some("") => Ok(CustomOutput::new(format!(
+                    "Hello from Rust, my dear default user with empty parameter! (body)"
+                ))),
+                Some("error") => Err(c.new_error("Empty first name (body)")),
+                _ => Ok(CustomOutput::new(format!(
                     "Hello from Rust, my dear {}! (body)",
-                    result.first_name.unwrap_or("no param".to_owned())
-                )))
-            }
-        };
-        // }
+                    result.first_name.unwrap_or("".to_owned())
+                ))),
+            };
+        }
     }
+
     Ok(CustomOutput {
         is_base64_encoded: false,
         status_code: 200,
         body: format!("Hello from Rust, my dear default user! No parameters"),
     })
 }
-
-// fn my_handler(e: CustomEvent, c: lambda::Context) -> Result<CustomOutput, HandlerError> {
-//     if let Some(x) = e.first_name {
-//         let x = x.as_str();
-//         match x {
-//             "" => Ok(CustomOutput {
-//                 message: format!("Hello from Rust, my dear default user with empty parameter!"),
-//             }),
-//             "error" => Err(c.new_error("Empty first name")),
-//             _ => Ok(CustomOutput {
-//                 message: format!("Hello from Rust, my dear {}!", x),
-//             }),
-//         }
-//     } else {
-//         Ok(CustomOutput {
-//             message: format!("Hello from Rust, my dear default user!"),
-//         })
-//     }
-// }
