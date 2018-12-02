@@ -18,7 +18,11 @@ struct CustomEvent {
 
 #[derive(Serialize, Clone)]
 struct CustomOutput {
-    message: String,
+    #[serde(rename = "isBase64Encoded")]
+    is_base64_encoded: bool,
+    #[serde(rename = "statusCode")]
+    status_code: u16,
+    body: String,
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -28,12 +32,18 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 
 fn my_handler(e: CustomEvent, c: lambda::Context) -> Result<CustomOutput, HandlerError> {
-    if e.first_name == "" {
-        error!("Empty first name in request {}", c.aws_request_id);
-        return Err(c.new_error("Empty first name"));
+    let x = e.first_name.as_str();
+    match x {
+        "" => Ok(CustomOutput {
+            is_base64_encoded: false,
+            status_code: 200,
+            body: format!("Hello from Rust, my dear default user!"),
+        }),
+        "error" => Err(c.new_error("Empty first name")),
+        _ => Ok(CustomOutput {
+            is_base64_encoded: false,
+            status_code: 200,
+            body: format!("Hello from Rust, my dear {}!", e.first_name),
+        }),
     }
-
-    Ok(CustomOutput {
-        message: format!("Hello, {}!", e.first_name),
-    })
 }
