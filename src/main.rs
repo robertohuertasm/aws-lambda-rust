@@ -1,14 +1,6 @@
-#[macro_use]
-extern crate lambda_runtime as lambda;
-#[macro_use]
-extern crate serde_derive;
-extern crate serde_json;
-// #[macro_use]
-// extern crate log;
-// extern crate simple_logger;
-
-use lambda::error::HandlerError;
+use lambda_runtime::{error::HandlerError, lambda};
 use std::error::Error;
+use serde_derive::{Serialize, Deserialize};
 
 // Struct that will hold information of the request.
 // When we use an API Gateway as a proxy, which is the default
@@ -78,7 +70,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 // In case there's no query string parameter, we'll check the body of the request.
 // The body comes as a string so we'll have to use `Serde` again to deserialize it.
 // Finally, if we have no body, we'll return a default response.
-fn my_handler(e: CustomEvent, c: lambda::Context) -> Result<CustomOutput, HandlerError> {
+fn my_handler(e: CustomEvent, c: lambda_runtime::Context) -> Result<CustomOutput, HandlerError> {
     // checking the query string
     if let Some(q) = e.query_string_parameters {
         if let Some(first_name) = q.first_name {
