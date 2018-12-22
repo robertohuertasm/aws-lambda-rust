@@ -1,4 +1,4 @@
-# aws-rust
+# aws-lambda-rust
 
 Testing [this guide](https://aws.amazon.com/es/blogs/opensource/rust-runtime-for-aws-lambda/) to deploy some Rust in AWS Lambda.
 
