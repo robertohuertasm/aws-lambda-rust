@@ -2,6 +2,8 @@
 
 Testing [this guide](https://aws.amazon.com/es/blogs/opensource/rust-runtime-for-aws-lambda/) to deploy some Rust in AWS Lambda.
 
+If you need more information you can read my [AWS Lambda Functions written in Rust](https://robertohuertas.com/2018/12/02/aws-lambda-rust/) blog post where I describe all the steps I took to build and publish a Lambda Function in Rust.
+
 ## Building the crate in OSX
 
 In order to build this project in OSX you must ensure that you have a folder called `.cargo` with a `config` file in it. This file must contain exactly this:
